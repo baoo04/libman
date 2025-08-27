@@ -1,0 +1,10 @@
+com\libman\model\User.class
+com\libman\controller\auth\LoginServlet.class
+com\libman\controller\reader\SearchServlet.class
+com\libman\dao\interfaces\UserDAO.class
+com\libman\filter\AuthFilter.class
+com\libman\util\PasswordUtil.class
+com\libman\filter\RoleFilter.class
+com\libman\config\DataSourceProvider.class
+com\libman\dao\impl\UserDAOImpl.class
+com\libman\util\Pagination.class

@@ -1,0 +1,50 @@
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee" version="5.0">
+    <display-name>LibMan</display-name>
+
+    <context-param>
+        <param-name>dbConfig</param-name>
+        <param-value>/db.properties</param-value>
+    </context-param>
+
+    <filter>
+        <filter-name>AuthFilter</filter-name>
+        <filter-class>com.libman.filter.AuthFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/app/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>RoleFilter</filter-name>
+        <filter-class>com.libman.filter.RoleFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>RoleFilter</filter-name>
+        <url-pattern>/app/manager/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>RoleFilter</filter-name>
+        <url-pattern>/app/librarian/*</url-pattern>
+    </filter-mapping>
+
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>com.libman.controller.auth.LoginServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/login</url-pattern>
+    </servlet-mapping>
+
+    <!-- ví dụ: -->
+    <servlet>
+        <servlet-name>SearchServlet</servlet-name>
+        <servlet-class>com.libman.controller.reader.SearchServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SearchServlet</servlet-name>
+        <url-pattern>/search</url-pattern>
+    </servlet-mapping>
+
+</web-app>
