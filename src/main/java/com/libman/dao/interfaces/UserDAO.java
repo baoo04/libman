@@ -8,6 +8,4 @@ public interface UserDAO {
     User findByUsername(String username);
 
     Set<String> findRoles(Long userId);
-
-    void updatePassword(Long userId, String newHash);
 }

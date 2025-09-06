@@ -2,7 +2,6 @@ F:\libman\src\main\java\com\libman\config\AppConfig.java
 F:\libman\src\main\java\com\libman\config\DataSourceProvider.java
 F:\libman\src\main\java\com\libman\controller\auth\LoginServlet.java
 F:\libman\src\main\java\com\libman\controller\auth\LogoutServlet.java
-F:\libman\src\main\java\com\libman\controller\auth\SearchServlet.java
 F:\libman\src\main\java\com\libman\controller\librarian\BorrowServlet.java
 F:\libman\src\main\java\com\libman\controller\librarian\DocumentServlet.java
 F:\libman\src\main\java\com\libman\controller\librarian\ImportServlet.java

@@ -34,20 +34,6 @@ public class UserDAOImpl implements UserDAO {
         return null;
     }
 
-    @Override
-    public void updatePassword(Long userId, String newHash) {
-        String sql = "UPDATE tblUser SET password = ? WHERE id = ?";
-        try (
-                Connection c = DataSourceProvider.get().getConnection();
-                PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, newHash);
-            ps.setLong(2, userId);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
     public Set<String> findRoles(Long userId) {
         Set<String> rslt = new HashSet<>();
         String sql = "SELECT r.code FROM tblUserRole ur JOIN tblRole r ON ur.role_id=r.id WHERE ur.user_id=?";

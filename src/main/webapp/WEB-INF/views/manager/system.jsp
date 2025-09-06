@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Statistic - Under Construction</title>
+    <title>Manage - Under Construction</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -27,7 +27,7 @@
   </head>
   <body>
     <div class="container">
-      <h1>Statistic Page</h1>
+      <h1>Manage Page</h1>
       <p>This page is under construction.</p>
       <p>Please check back later.</p>
     </div>
