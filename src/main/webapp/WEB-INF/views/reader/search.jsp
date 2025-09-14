@@ -41,6 +41,18 @@
                 ${d.title}
               </a>
               <p class="text-sm text-gray-500">Quantity: ${d.quantity}</p>
+              <p>
+                <span class="font-medium text-gray-900">Author:</span>
+                ${d.author}
+              </p>
+              <p>
+                <span class="font-medium text-gray-900">Publisher:</span>
+                ${d.publisher}
+              </p>
+              <p>
+                <span class="font-medium text-gray-900">Publish Year:</span>
+                ${d.publishYear}
+              </p>
             </li>
           </c:forEach>
         </ul>

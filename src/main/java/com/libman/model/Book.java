@@ -8,6 +8,7 @@ public class Book {
     private String title;
     private String author;
     private String publisher;
+    private Long price;
     private int publishYear;
     private String category;
     private int quantity;
@@ -15,20 +16,23 @@ public class Book {
     private String description;
     private LocalDate createdAt;
     private LocalDate updatedAt;
+    private String content;
 
     public Book() {
     }
 
-    public Book(String isbn, String title, String author, String publisher,
-            int publishYear, String category, int quantity) {
+    public Book(String isbn, String title, String author, String publisher, Long price,
+            int publishYear, String category, int quantity, String content) {
         this.isbn = isbn;
         this.title = title;
         this.author = author;
         this.publisher = publisher;
+        this.price = price;
         this.publishYear = publishYear;
         this.category = category;
         this.quantity = quantity;
         this.availableQuantity = quantity;
+        this.content = content;
     }
 
     public int getId() {
@@ -71,6 +75,14 @@ public class Book {
         this.publisher = publisher;
     }
 
+    public Long getPrice() {
+        return price;
+    }
+
+    public void setPrice(Long price) {
+        this.price = price;
+    }
+
     public int getPublishYear() {
         return publishYear;
     }
@@ -109,6 +121,14 @@ public class Book {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public LocalDate getCreatedAt() {

@@ -66,6 +66,7 @@ public class DocumentDAOImpl implements DocumentDAO {
                     book.setQuantity(rs.getInt("quantity"));
                     book.setAvailableQuantity(rs.getInt("availableQuantity"));
                     book.setDescription(rs.getString("description"));
+                    book.setContent(rs.getString("content"));
                     return book;
                 }
             }

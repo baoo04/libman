@@ -14,32 +14,37 @@ import="com.libman.model.Book" %>
 
       <div class="space-y-3 text-gray-700">
         <p>
-          <span class="font-medium text-gray-900">Tác giả:</span> <%=
+          <span class="font-medium text-gray-900">Author:</span> <%=
           book.getAuthor() %>
         </p>
         <p>
-          <span class="font-medium text-gray-900">Nhà xuất bản:</span> <%=
+          <span class="font-medium text-gray-900">Publisher:</span> <%=
           book.getPublisher() %>
         </p>
         <p>
-          <span class="font-medium text-gray-900">Năm XB:</span> <%=
+          <span class="font-medium text-gray-900">Publish Year: </span> <%=
           book.getPublishYear() %>
         </p>
         <p>
-          <span class="font-medium text-gray-900">Thể loại:</span> <%=
+          <span class="font-medium text-gray-900">Category: </span> <%=
           book.getCategory() %>
         </p>
         <p>
-          <span class="font-medium text-gray-900">Số lượng:</span> <%=
+          <span class="font-medium text-gray-900">Quantity: </span> <%=
           book.getQuantity() %>
         </p>
         <p>
-          <span class="font-medium text-gray-900">Còn lại:</span> <%=
-          book.getAvailableQuantity() %>
+          <span class="font-medium text-gray-900">Available Quantity: </span>
+          <%= book.getAvailableQuantity() %>
         </p>
         <p>
-          <span class="font-medium text-gray-900">Mô tả:</span> <%=
+          <span class="font-medium text-gray-900">Description: </span> <%=
           book.getDescription() %>
+        </p>
+
+        <p>
+          <span class="font-medium text-gray-900">Content: </span> <%=
+          book.getContent() %>
         </p>
       </div>
 
@@ -48,7 +53,7 @@ import="com.libman.model.Book" %>
           href="${pageContext.request.contextPath}/search"
           class="inline-block px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
         >
-          Quay lại tìm kiếm
+          Back to search
         </a>
       </div>
       <% } else { %>
@@ -58,7 +63,7 @@ import="com.libman.model.Book" %>
           href="${pageContext.request.contextPath}/search"
           class="inline-block px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
         >
-          Quay lại tìm kiếm
+          Back to search
         </a>
       </div>
       <% } %>

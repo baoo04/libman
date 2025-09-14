@@ -77,6 +77,9 @@ public class User {
         return this.status;
     }
 
+
+    
+
     @Override
     public boolean equals(Object o) {
         if (this == o)

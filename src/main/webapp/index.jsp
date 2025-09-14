@@ -33,7 +33,7 @@ pageEncoding="UTF-8"%>
           Find Book
         </a>
         <a
-          href="import.jsp"
+          href="${pageContext.request.contextPath}/import"
           class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
         >
           Import Books
@@ -45,7 +45,7 @@ pageEncoding="UTF-8"%>
           View Statistic
         </a>
       </div>
-    </div>
+    </div>ư
 
     <jsp:include page="/WEB-INF/views/_layouts/footer.jsp" />
   </body>

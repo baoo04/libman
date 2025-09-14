@@ -64,6 +64,8 @@ public class Reader {
         this.email = email;
     }
 
+    
+
     public String getPhone() {
         return phone;
     }

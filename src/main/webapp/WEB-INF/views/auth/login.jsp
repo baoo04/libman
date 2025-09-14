@@ -71,12 +71,6 @@ pageEncoding="UTF-8"%>
               Đăng nhập
             </button>
           </div>
-
-          <div class="text-center">
-            <a href="../" class="text-indigo-600 hover:text-indigo-500">
-              ← Quay về trang chủ
-            </a>
-          </div>
         </form>
       </div>
     </div>
