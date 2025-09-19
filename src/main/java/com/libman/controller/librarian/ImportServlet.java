@@ -55,6 +55,8 @@ public class ImportServlet extends HttpServlet {
                 s.setAddress(address);
                 supplierDAO.create(s);
                 req.setAttribute("message", "Đã thêm nhà cung cấp: " + s.getName());
+                session.setAttribute("selected_supplier", s);
+                session.setAttribute("selected_supplier_id", String.valueOf(s.getId()));
                 req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
                 return;
             }
@@ -171,7 +173,6 @@ public class ImportServlet extends HttpServlet {
 
                     Book book = bookDAO.findByIsbn(isbn);
                     if (book == null) {
-                        // Create new book with all attributes
                         Book b = new Book();
                         b.setIsbn(isbn);
                         b.setTitle(title.trim());
@@ -182,7 +183,7 @@ public class ImportServlet extends HttpServlet {
                         b.setDescription(description != null ? description.trim() : "");
                         b.setContent(content != null ? content.trim() : "");
                         b.setPrice(bookPrice);
-                        b.setQuantity(0); // Will be updated after import
+                        b.setQuantity(0);
                         b.setAvailableQuantity(0);
 
                         bookDAO.create(b);
@@ -261,6 +262,7 @@ public class ImportServlet extends HttpServlet {
                 }
 
                 req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
+                session.removeAttribute("selected_document");
                 return;
             }
 
