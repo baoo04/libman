@@ -1,7 +1,7 @@
 package com.libman.controller.librarian;
 
 import com.libman.dao.SupplierDAO;
-import com.libman.dao.BookDAO;
+import com.libman.dao.DocumentDAO;
 import com.libman.dao.ImportOrderDAO;
 import com.libman.model.*;
 
@@ -14,13 +14,26 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.*;
 
 @WebServlet("/import")
 public class ImportServlet extends HttpServlet {
-    private SupplierDAO supplierDAO = new SupplierDAO();
-    private BookDAO bookDAO = new BookDAO();
-    private ImportOrderDAO importOrderDAO = new ImportOrderDAO();
+    private SupplierDAO supplierDAO;
+    private DocumentDAO documentDAO;
+    private ImportOrderDAO importOrderDAO;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        try {
+            supplierDAO = new SupplierDAO();
+            documentDAO = new DocumentDAO();
+            importOrderDAO = new ImportOrderDAO();
+        } catch (java.sql.SQLException e) {
+            throw new ServletException("Failed to initialize DAOs", e);
+        }
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -61,8 +74,7 @@ public class ImportServlet extends HttpServlet {
                 return;
             }
 
-            @SuppressWarnings("unchecked")
-            List<ImportOrderItem> cart = (List<ImportOrderItem>) session.getAttribute("import_cart");
+            @SuppressWarnings("unchecked") List<ImportOrderItem> cart = (List<ImportOrderItem>) session.getAttribute("import_cart");
             if (cart == null) {
                 cart = new ArrayList<>();
             }
@@ -91,36 +103,13 @@ public class ImportServlet extends HttpServlet {
 
             if ("searchDocument".equals(action)) {
                 String name = req.getParameter("documentName");
-                List<Book> found = bookDAO.searchByName(name == null ? "" : name);
+                List<Book> found = documentDAO.searchByName(name == null ? "" : name);
                 req.setAttribute("documents", found);
                 req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
                 return;
             }
 
-            if ("selectDocument".equals(action)) {
-                String documentIdStr = req.getParameter("document_id");
-                if (documentIdStr != null && !documentIdStr.trim().isEmpty()) {
-                    try {
-                        int documentId = Integer.parseInt(documentIdStr);
-                        session.setAttribute("selected_document_id", documentIdStr);
-
-                        Book selectedDocument = bookDAO.findById(documentId);
-                        if (selectedDocument != null) {
-                            session.setAttribute("selected_document", selectedDocument);
-                            req.setAttribute("message", "Đã chọn tài liệu " + selectedDocument.getTitle());
-                        }
-                    } catch (NumberFormatException e) {
-                        req.setAttribute("error", "ID tài liệu không hợp lệ");
-                    } catch (Exception e) {
-                        req.setAttribute("error", "Lỗi khi chọn tài liệu: " + e.getMessage());
-                    }
-                }
-                req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
-                return;
-            }
-
             if ("addItem".equals(action)) {
-                // Get all book attributes
                 String isbn = req.getParameter("isbn");
                 String title = req.getParameter("title");
                 String author = req.getParameter("author");
@@ -132,15 +121,34 @@ public class ImportServlet extends HttpServlet {
                 String priceStr = req.getParameter("price");
                 String qtyStr = req.getParameter("quantity");
 
-                // Validate required fields
                 if (isbn == null || isbn.trim().isEmpty()) {
                     req.setAttribute("error", "ISBN không được để trống");
                     req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
                     return;
                 }
 
-                if (title == null || title.trim().isEmpty()) {
-                    req.setAttribute("error", "Tiêu đề không được để trống");
+                // If title is not provided but ISBN exists, try to get from database
+                if ((title == null || title.trim().isEmpty())) {
+                    Book existingBook = documentDAO.findByIsbn(isbn);
+                    if (existingBook != null) {
+                        title = existingBook.getTitle();
+                        if (author == null || author.trim().isEmpty()) author = existingBook.getAuthor();
+                        if (publisher == null || publisher.trim().isEmpty()) publisher = existingBook.getPublisher();
+                        if (publishYearStr == null || publishYearStr.trim().isEmpty())
+                            publishYearStr = String.valueOf(existingBook.getPublishYear());
+                        if (category == null || category.trim().isEmpty()) category = existingBook.getCategory();
+                        if (description == null || description.trim().isEmpty())
+                            description = existingBook.getDescription();
+                        if (content == null || content.trim().isEmpty()) content = existingBook.getContent();
+                    } else {
+                        req.setAttribute("error", "Tiêu đề không được để trống");
+                        req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
+                        return;
+                    }
+                }
+
+                if (priceStr == null || priceStr.trim().isEmpty()) {
+                    req.setAttribute("error", "Giá nhập không được để trống");
                     req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
                     return;
                 }
@@ -153,25 +161,37 @@ public class ImportServlet extends HttpServlet {
 
                 try {
                     int qty = Integer.parseInt(qtyStr);
+                    // Handle both integer and decimal inputs for price
+                    double priceDouble = Double.parseDouble(priceStr);
+                    long bookPrice = (long) priceDouble;
                     int publishYear = 0;
-                    long bookPrice = 0;
 
                     if (publishYearStr != null && !publishYearStr.trim().isEmpty()) {
                         publishYear = Integer.parseInt(publishYearStr);
                     }
 
-                    if (priceStr != null && !priceStr.trim().isEmpty()) {
-                        bookPrice = Long.parseLong(priceStr);
-                    }
-
-                    // Validate positive values
                     if (qty <= 0) {
                         req.setAttribute("error", "Số lượng phải lớn hơn 0");
                         req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
                         return;
                     }
 
-                    Book book = bookDAO.findByIsbn(isbn);
+                    if (bookPrice <= 0) {
+                        req.setAttribute("error", "Giá nhập phải lớn hơn 0");
+                        req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
+                        return;
+                    }
+
+                    for (ImportOrderItem existingItem : cart) {
+                        if (existingItem.getBook().getIsbn().equals(isbn)) {
+                            req.setAttribute("error", "ISBN này đã có trong giỏ hàng. Vui lòng chỉnh sửa trực tiếp trong bảng.");
+                            req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
+                            return;
+                        }
+                    }
+
+                    // Create or update book in database
+                    Book book = documentDAO.findByIsbn(isbn);
                     if (book == null) {
                         Book b = new Book();
                         b.setIsbn(isbn);
@@ -186,74 +206,20 @@ public class ImportServlet extends HttpServlet {
                         b.setQuantity(0);
                         b.setAvailableQuantity(0);
 
-                        bookDAO.create(b);
-                        book = bookDAO.findByIsbn(isbn);
-                        req.setAttribute("message", "Đã tạo sách mới: " + book.getTitle());
+                        documentDAO.create(b);
+                        book = documentDAO.findByIsbn(isbn);
+                        req.setAttribute("message", "Đã tạo sách mới và thêm vào giỏ: " + book.getTitle());
                     } else {
-                        // Update existing book with new information if provided
-                        boolean updated = false;
-                        if (!title.trim().equals(book.getTitle())) {
-                            book.setTitle(title.trim());
-                            updated = true;
-                        }
-                        if (author != null && !author.trim().equals(book.getAuthor())) {
-                            book.setAuthor(author.trim());
-                            updated = true;
-                        }
-                        if (publisher != null && !publisher.trim().equals(book.getPublisher())) {
-                            book.setPublisher(publisher.trim());
-                            updated = true;
-                        }
-                        if (publishYear > 0 && publishYear != book.getPublishYear()) {
-                            book.setPublishYear(publishYear);
-                            updated = true;
-                        }
-                        if (category != null && !category.trim().equals(book.getCategory())) {
-                            book.setCategory(category.trim());
-                            updated = true;
-                        }
-                        if (description != null && !description.trim().equals(book.getDescription())) {
-                            book.setDescription(description.trim());
-                            updated = true;
-                        }
-                        if (content != null && !content.trim().equals(book.getContent())) {
-                            book.setContent(content.trim());
-                            updated = true;
-                        }
-                        if (bookPrice > 0 && bookPrice != book.getPrice()) {
-                            book.setPrice(bookPrice);
-                            updated = true;
-                        }
-
-                        if (updated) {
-                            bookDAO.update(book);
-                            req.setAttribute("message", "Đã cập nhật thông tin sách: " + book.getTitle());
-                        }
+                        req.setAttribute("message", "Đã thêm sách vào giỏ: " + book.getTitle());
                     }
 
-                    // Check if item with same ISBN already exists in cart
-                    boolean itemExists = false;
-                    for (ImportOrderItem existingItem : cart) {
-                        if (existingItem.getBook().getIsbn().equals(isbn)) {
-                            // Update existing item
-                            existingItem.setQuantity(existingItem.getQuantity() + qty);
-                            itemExists = true;
-                            req.setAttribute("message", "Đã cập nhật số lượng cho: " + book.getTitle());
-                            break;
-                        }
-                    }
-
-                    if (!itemExists) {
-                        ImportOrderItem item = new ImportOrderItem();
-                        item.setBook(book);
-                        item.setQuantity(qty);
-                        item.setLineTotal(book.getPrice() * book.getQuantity());
-                        cart.add(item);
-
-                        if (!req.getAttribute("message").toString().contains("cập nhật")) {
-                            req.setAttribute("message", "Đã thêm vào danh sách nhập: " + book.getTitle());
-                        }
-                    }
+                    // Add to cart
+                    ImportOrderItem item = new ImportOrderItem();
+                    item.setBook(book);
+                    item.setQuantity(qty);
+                    item.setUnitPrice(bookPrice);
+                    item.setLineTotal(bookPrice * qty);
+                    cart.add(item);
 
                     session.setAttribute("import_cart", cart);
 
@@ -261,32 +227,115 @@ public class ImportServlet extends HttpServlet {
                     req.setAttribute("error", "Số lượng, năm xuất bản, hoặc giá không hợp lệ");
                 }
 
-                req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
-                session.removeAttribute("selected_document");
+                resp.sendRedirect(req.getContextPath() + "/import");
                 return;
             }
 
-            if ("updateItemPrice".equals(action)) {
-                String indexStr = req.getParameter("index");
-                String newPriceStr = req.getParameter("newPrice");
+            if ("updateItem".equals(action)) {
+                String idxStr = req.getParameter("index");
+                String qtyStr = req.getParameter("quantity");
+                String priceStr = req.getParameter("price");
+                String author = req.getParameter("author");
+                String publisher = req.getParameter("publisher");
+                String publishYearStr = req.getParameter("publishYear");
+                String category = req.getParameter("category");
+                String description = req.getParameter("description");
+                String content = req.getParameter("content");
 
                 try {
-                    int index = Integer.parseInt(indexStr);
-                    double newPrice = Double.parseDouble(newPriceStr);
+                    int idx = Integer.parseInt(idxStr);
+                    if (idx >= 0 && idx < cart.size()) {
+                        ImportOrderItem item = cart.get(idx);
+                        Book book = item.getBook();
 
-                    if (index >= 0 && index < cart.size() && newPrice > 0) {
-                        ImportOrderItem item = cart.get(index);
-                        item.setUnitPrice(newPrice);
-                        item.setLineTotal(item.getQuantity() * newPrice);
+                        // Parse and validate quantity
+                        int qty;
+                        try {
+                            qty = Integer.parseInt(qtyStr);
+                            if (qty <= 0) {
+                                req.setAttribute("error", "Số lượng phải lớn hơn 0");
+                                req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
+                                return;
+                            }
+                        } catch (NumberFormatException e) {
+                            req.setAttribute("error", "Số lượng không hợp lệ: " + qtyStr);
+                            req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
+                            return;
+                        }
+
+                        // Parse and validate price
+                        long price;
+                        try {
+                            // Handle both integer and decimal inputs
+                            double priceDouble = Double.parseDouble(priceStr);
+                            price = (long) priceDouble;
+                            if (price <= 0) {
+                                req.setAttribute("error", "Giá nhập phải lớn hơn 0");
+                                req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
+                                return;
+                            }
+                        } catch (NumberFormatException e) {
+                            req.setAttribute("error", "Giá không hợp lệ: " + priceStr);
+                            req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
+                            return;
+                        }
+
+                        // Update cart item
+                        item.setQuantity(qty);
+                        item.setUnitPrice(price);
+                        item.setLineTotal(qty * price);
+
+                        // Update book info
+                        boolean bookUpdated = false;
+                        if (author != null && !author.trim().equals(book.getAuthor())) {
+                            book.setAuthor(author.trim());
+                            bookUpdated = true;
+                        }
+                        if (publisher != null && !publisher.trim().equals(book.getPublisher())) {
+                            book.setPublisher(publisher.trim());
+                            bookUpdated = true;
+                        }
+                        if (publishYearStr != null && !publishYearStr.trim().isEmpty()) {
+                            try {
+                                int publishYear = Integer.parseInt(publishYearStr);
+                                if (publishYear != book.getPublishYear()) {
+                                    book.setPublishYear(publishYear);
+                                    bookUpdated = true;
+                                }
+                            } catch (NumberFormatException e) {
+                                // Ignore invalid year, keep original value
+                            }
+                        }
+                        if (category != null && !category.trim().equals(book.getCategory())) {
+                            book.setCategory(category.trim());
+                            bookUpdated = true;
+                        }
+                        if (description != null && !description.trim().equals(book.getDescription())) {
+                            book.setDescription(description.trim());
+                            bookUpdated = true;
+                        }
+                        if (content != null && !content.trim().equals(book.getContent())) {
+                            book.setContent(content.trim());
+                            bookUpdated = true;
+                        }
+                        if (price != book.getPrice()) {
+                            book.setPrice(price);
+                            bookUpdated = true;
+                        }
+
+                        if (bookUpdated) {
+                            documentDAO.update(book);
+                        }
+
                         session.setAttribute("import_cart", cart);
-                        req.setAttribute("message", "Đã cập nhật giá cho: " + item.getBook().getTitle());
+                        req.setAttribute("message", "Đã cập nhật thông tin sách: " + book.getTitle());
                     } else {
-                        req.setAttribute("error", "Thông tin cập nhật giá không hợp lệ");
+                        req.setAttribute("error", "Chỉ số không hợp lệ");
                     }
                 } catch (NumberFormatException e) {
-                    req.setAttribute("error", "Giá mới không hợp lệ");
+                    req.setAttribute("error", "Dữ liệu không hợp lệ: " + e.getMessage());
+                    e.printStackTrace();
                 }
-
                 req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
                 return;
             }
@@ -309,17 +358,15 @@ public class ImportServlet extends HttpServlet {
                     return;
                 }
 
-                @SuppressWarnings("unchecked")
-                List<ImportOrderItem> items = (List<ImportOrderItem>) session.getAttribute("import_cart");
+                @SuppressWarnings("unchecked") List<ImportOrderItem> items = (List<ImportOrderItem>) session.getAttribute("import_cart");
                 if (items == null || items.isEmpty()) {
                     req.setAttribute("error", "Danh sách nhập trống");
                     req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
                     return;
                 }
 
-                // Validate all items have valid prices
                 for (ImportOrderItem item : items) {
-                    if (item.book.getPrice() <= 0) {
+                    if (item.getUnitPrice() <= 0) {
                         req.setAttribute("error", "Tất cả sản phẩm phải có giá hợp lệ");
                         req.getRequestDispatcher("/WEB-INF/views/librarian/import.jsp").forward(req, resp);
                         return;
@@ -330,15 +377,10 @@ public class ImportServlet extends HttpServlet {
                 order.setSupplier(s);
                 order.setCreatedBy(createdBy == null ? "unknown" : createdBy);
                 order.setItems(items);
-                double total = items.stream().mapToDouble(i -> i.getLineTotal()).sum();
+                double total = items.stream().mapToDouble(ImportOrderItem::getLineTotal).sum();
                 order.setTotalAmount(total);
 
                 int orderId = importOrderDAO.create(order);
-
-                // Clear cart after successful order creation
-                session.removeAttribute("import_cart");
-                session.removeAttribute("selected_supplier");
-                session.removeAttribute("selected_supplier_id");
 
                 resp.sendRedirect(req.getContextPath() + "/invoice?id=" + orderId);
                 return;

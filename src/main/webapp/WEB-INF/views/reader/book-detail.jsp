@@ -4,92 +4,158 @@ import="com.libman.model.Book" %>
   <head>
     <title>Book Details</title>
     <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
-    <div class="w-full max-w-3xl bg-white shadow-xl rounded-xl p-8">
-      <% Book book = (Book) request.getAttribute("book"); if (book != null) { %>
-      <!-- Title -->
-      <h2 class="text-3xl font-bold text-green-700 mb-6 border-b pb-3">
-        <%= book.getTitle() %>
-      </h2>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <style>
+      body {
+        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+          url("${pageContext.request.contextPath}/images/bg_detail.jpg")
+            center/cover no-repeat fixed;
+        min-height: 100vh;
+        font-family: "Inter", sans-serif;
+      }
 
-      <!-- Grid info -->
+      /* Brown button theme */
+      .btn-brown {
+        background-color: #b58863;
+        color: white;
+        box-shadow: 0 2px 6px rgba(90, 45, 15, 0.25);
+        transition: all 0.25s ease;
+      }
+      .btn-brown:hover {
+        background-color: #a1744f;
+        box-shadow: 0 4px 10px rgba(90, 45, 15, 0.35);
+        transform: translateY(-1px);
+      }
+
+      .tag {
+        background-color: #fdf7f2;
+        color: #7a5236;
+        font-weight: 600;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.85rem;
+      }
+
+      .section-box {
+        background-color: #fcf8f5;
+        border: 1px solid #e8d8ca;
+        border-radius: 1rem;
+        padding: 1rem 1.25rem;
+        color: #5b4633;
+        box-shadow: inset 0 1px 2px rgba(181, 136, 99, 0.1);
+      }
+    </style>
+  </head>
+
+  <body class="flex items-center justify-center p-8 text-gray-900">
+    <div
+      class="w-full max-w-4xl bg-white/95 backdrop-blur-md shadow-2xl rounded-2xl p-10"
+    >
+      <% Book book = (Book) request.getAttribute("book"); if (book != null) { %>
+
+      <!-- Title -->
+      <div class="flex items-center justify-between border-b pb-4 mb-6">
+        <h2 class="text-4xl font-bold text-[#a1744f] flex items-center gap-3">
+          <i class="fa-solid fa-book-open-reader text-[#b58863]"></i>
+          <%= book.getTitle() %>
+        </h2>
+      </div>
+
+      <!-- Book Info Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
         <p>
-          <span class="font-semibold text-gray-900">Author:</span>
+          <span class="font-semibold text-gray-900"
+            ><i class="fa-solid fa-user-pen mr-1 text-[#b58863]"></i>
+            Author:</span
+          >
           <span class="ml-1"><%= book.getAuthor() %></span>
         </p>
+
         <p>
-          <span class="font-semibold text-gray-900">Publisher:</span>
+          <span class="font-semibold text-gray-900"
+            ><i class="fa-solid fa-building mr-1 text-[#b58863]"></i>
+            Publisher:</span
+          >
           <span class="ml-1"><%= book.getPublisher() %></span>
         </p>
+
         <p>
-          <span class="font-semibold text-gray-900">Publish Year:</span>
+          <span class="font-semibold text-gray-900"
+            ><i class="fa-solid fa-calendar mr-1 text-[#b58863]"></i> Publish
+            Year:</span
+          >
           <span class="ml-1"><%= book.getPublishYear() %></span>
         </p>
+
         <p>
-          <span class="font-semibold text-gray-900">Category:</span>
-          <span
-            class="ml-1 inline-block px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full"
+          <span class="font-semibold text-gray-900"
+            ><i class="fa-solid fa-tag mr-1 text-[#b58863]"></i> Category:</span
           >
-            <%= book.getCategory() %>
-          </span>
+          <span class="tag"><%= book.getCategory() %></span>
         </p>
+
         <p>
-          <span class="font-semibold text-gray-900">Quantity:</span>
-          <span
-            class="ml-1 inline-block px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full"
+          <span class="font-semibold text-gray-900"
+            ><i class="fa-solid fa-boxes-stacked mr-1 text-[#b58863]"></i>
+            Quantity:</span
           >
-            <%= book.getQuantity() %>
-          </span>
+          <span class="tag"><%= book.getQuantity() %></span>
         </p>
+
         <p>
-          <span class="font-semibold text-gray-900">Available:</span>
-          <span
-            class="ml-1 inline-block px-3 py-1 bg-yellow-100 text-yellow-700 text-sm rounded-full"
+          <span class="font-semibold text-gray-900"
+            ><i class="fa-solid fa-check-circle mr-1 text-[#b58863]"></i>
+            Available:</span
           >
-            <%= book.getAvailableQuantity() %>
-          </span>
+          <span class="tag"><%= book.getAvailableQuantity() %></span>
         </p>
       </div>
 
       <!-- Description -->
-      <div class="mt-6">
-        <h3 class="text-xl font-semibold text-gray-800 mb-2">Description</h3>
-        <div
-          class="p-4 bg-gray-50 border rounded-lg text-gray-600 leading-relaxed"
+      <div class="mt-8">
+        <h3
+          class="text-2xl font-semibold text-[#5a4634] mb-3 flex items-center gap-2"
         >
+          <i class="fa-solid fa-align-left text-[#b58863]"></i> Description
+        </h3>
+        <div class="section-box leading-relaxed">
           <%= book.getDescription() %>
         </div>
       </div>
 
       <!-- Content -->
-      <div class="mt-6">
-        <h3 class="text-xl font-semibold text-gray-800 mb-2">Content</h3>
-        <div
-          class="p-4 bg-gray-50 border rounded-lg text-gray-600 leading-relaxed"
+      <div class="mt-8">
+        <h3
+          class="text-2xl font-semibold text-[#5a4634] mb-3 flex items-center gap-2"
         >
-          <%= book.getContent() %>
-        </div>
+          <i class="fa-solid fa-file-lines text-[#b58863]"></i> Content
+        </h3>
+        <div class="section-box leading-relaxed"><%= book.getContent() %></div>
       </div>
 
       <!-- Back button -->
-      <div class="mt-8 flex justify-end">
+      <div class="mt-10 flex justify-end">
         <a
           href="${pageContext.request.contextPath}/search"
-          class="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-medium rounded-lg shadow hover:bg-green-700 transition"
+          class="btn-brown inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-xl"
         >
-          Back to Search
+          <i class="fa-solid fa-arrow-left"></i> Back to Search
         </a>
       </div>
+
       <% } else { %>
-      <p class="text-red-500 font-medium">❌ Không tìm thấy tài liệu.</p>
-      <div class="mt-6">
+      <p class="text-red-600 font-semibold text-lg">
+        <i class="fa-solid fa-triangle-exclamation mr-2"></i> Book not found.
+      </p>
+      <div class="mt-6 flex justify-end">
         <a
           href="${pageContext.request.contextPath}/search"
-          class="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-medium rounded-lg shadow hover:bg-green-700 transition"
+          class="btn-brown inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-xl"
         >
-          Back to Search
+          <i class="fa-solid fa-arrow-left"></i> Back to Search
         </a>
       </div>
       <% } %>
