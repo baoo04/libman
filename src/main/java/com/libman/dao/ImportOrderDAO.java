@@ -2,11 +2,9 @@ package com.libman.dao;
 
 import com.libman.model.ImportOrder;
 import com.libman.model.ImportOrderItem;
-import com.libman.model.Book;
 import com.libman.model.Supplier;
 
 import java.sql.*;
-import java.util.*;
 
 public class ImportOrderDAO extends DAO {
     public ImportOrderDAO() throws SQLException {
@@ -20,7 +18,9 @@ public class ImportOrderDAO extends DAO {
 
         try {
             conn.setAutoCommit(false);
-            ps = conn.prepareStatement("INSERT INTO tblImportOrder(supplier_id, created_by, total_amount, created_at) VALUES(?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+            ps = conn.prepareStatement(
+                    "INSERT INTO tblImportOrder(supplier_id, created_by, total_amount, created_at) VALUES(?,?,?,?)",
+                    Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, order.getSupplier().getId());
             ps.setString(2, order.getCreatedBy());
             ps.setDouble(3, order.getTotalAmount());
@@ -37,8 +37,10 @@ public class ImportOrderDAO extends DAO {
             if (orderId == -1) {
                 throw new SQLException("Failed to create import order, no ID obtained.");
             }
-            psItem = conn.prepareStatement("INSERT INTO tblImportOrderItem(import_order_id, book_id, quantity, unit_price, line_total) VALUES(?,?,?,?,?)");
-            psUpdate = conn.prepareStatement("UPDATE tblBook SET quantity = quantity + ?, availableQuantity = availableQuantity + ? WHERE id = ?");
+            psItem = conn.prepareStatement(
+                    "INSERT INTO tblImportOrderItem(import_order_id, book_id, quantity, unit_price, line_total) VALUES(?,?,?,?,?)");
+            psUpdate = conn.prepareStatement(
+                    "UPDATE tblDocument SET quantity = quantity + ?, availableQuantity = availableQuantity + ? WHERE id = ?");
 
             for (ImportOrderItem item : order.getItems()) {
                 psItem.setInt(1, orderId);
@@ -70,9 +72,12 @@ public class ImportOrderDAO extends DAO {
 
         } finally {
             try {
-                if (psUpdate != null) psUpdate.close();
-                if (psItem != null) psItem.close();
-                if (ps != null) ps.close();
+                if (psUpdate != null)
+                    psUpdate.close();
+                if (psItem != null)
+                    psItem.close();
+                if (ps != null)
+                    ps.close();
                 if (conn != null) {
                     conn.setAutoCommit(true);
                 }
@@ -86,7 +91,8 @@ public class ImportOrderDAO extends DAO {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            ps = conn.prepareStatement("SELECT io.*, s.name as supplier_name FROM tblImportOrder io " + "JOIN tblSupplier s ON io.supplier_id = s.id WHERE io.id = ?");
+            ps = conn.prepareStatement("SELECT io.*, s.name as supplier_name FROM tblImportOrder io "
+                    + "JOIN tblSupplier s ON io.supplier_id = s.id WHERE io.id = ?");
             ps.setInt(1, id);
             rs = ps.executeQuery();
 
@@ -108,71 +114,10 @@ public class ImportOrderDAO extends DAO {
             return order;
 
         } finally {
-            if (rs != null) rs.close();
-            if (ps != null) ps.close();
+            if (rs != null)
+                rs.close();
+            if (ps != null)
+                ps.close();
         }
-    }
-
-    public List<ImportOrderItem> getOrderItems(int importOrderId) throws SQLException {
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<ImportOrderItem> items = new ArrayList<>();
-
-        try {
-            ps = conn.prepareStatement("SELECT i.*, b.title, b.isbn FROM tblImportOrderItem i " + "JOIN tblBook b ON i.book_id = b.id WHERE i.import_order_id = ?");
-            ps.setInt(1, importOrderId);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                ImportOrderItem item = new ImportOrderItem();
-                item.setQuantity(rs.getInt("quantity"));
-                item.setUnitPrice(rs.getDouble("unit_price"));
-                item.setLineTotal(rs.getDouble("line_total"));
-
-                Book book = new Book();
-                book.setId(rs.getInt("book_id"));
-                book.setTitle(rs.getString("title"));
-                book.setIsbn(rs.getString("isbn"));
-                item.setBook(book);
-
-                items.add(item);
-            }
-
-            return items;
-
-        } finally {
-            if (rs != null) rs.close();
-            if (ps != null) ps.close();
-        }
-    }
-
-    public Map<String, Object> getInvoiceData(int id) throws SQLException {
-        ImportOrder order = getById(id);
-        if (order == null) {
-            return null;
-        }
-
-        List<ImportOrderItem> items = getOrderItems(id);
-
-        Map<String, Object> invoiceData = new HashMap<>();
-        invoiceData.put("orderId", order.getId());
-        invoiceData.put("supplierName", order.getSupplier().getName());
-        invoiceData.put("createdAt", order.getCreatedAt());
-        invoiceData.put("createdBy", order.getCreatedBy());
-        invoiceData.put("totalAmount", order.getTotalAmount());
-
-        List<Map<String, Object>> itemMaps = new ArrayList<>();
-        for (ImportOrderItem item : items) {
-            Map<String, Object> m = new HashMap<>();
-            m.put("title", item.getBook().getTitle());
-            m.put("isbn", item.getBook().getIsbn());
-            m.put("quantity", item.getQuantity());
-            m.put("unitPrice", item.getUnitPrice());
-            m.put("lineTotal", item.getLineTotal());
-            itemMaps.add(m);
-        }
-        invoiceData.put("items", itemMaps);
-
-        return invoiceData;
     }
 }

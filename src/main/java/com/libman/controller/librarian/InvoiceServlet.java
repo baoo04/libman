@@ -2,8 +2,7 @@ package com.libman.controller.librarian;
 
 import java.io.IOException;
 import java.util.Map;
-
-import com.libman.dao.ImportOrderDAO;
+import com.libman.dao.InvoiceDAO;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -22,7 +21,7 @@ public class InvoiceServlet extends HttpServlet {
         try {
             int id = Integer.parseInt(idStr);
 
-            ImportOrderDAO dao = new ImportOrderDAO();
+            InvoiceDAO dao = new InvoiceDAO();
             Map<String, Object> invoiceData = dao.getInvoiceData(id);
 
             if (invoiceData == null) {

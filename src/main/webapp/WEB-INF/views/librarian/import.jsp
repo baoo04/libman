@@ -142,7 +142,6 @@
           </div>
         </div>
 
-        <!-- Add Supplier -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4">
             <h2 class="text-xl font-semibold text-white">Add New Supplier</h2>

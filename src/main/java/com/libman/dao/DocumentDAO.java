@@ -12,7 +12,7 @@ public class DocumentDAO extends DAO {
     }
 
     public Book findById(int id) throws Exception {
-        PreparedStatement ps = conn.prepareStatement("SELECT * FROM tblBook WHERE id=?");
+        PreparedStatement ps = conn.prepareStatement("SELECT * FROM tblDocument WHERE id=?");
         ps.setInt(1, id);
         try (ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
@@ -38,7 +38,7 @@ public class DocumentDAO extends DAO {
     public Book create(Book b) throws Exception {
 
         PreparedStatement ps = conn.prepareStatement(
-                "INSERT INTO tblBook(isbn,title,author,publisher,price,publishYear,category,quantity,availableQuantity,description,content) "
+                "INSERT INTO tblDocument(isbn,title,author,publisher,price,publishYear,category,quantity,availableQuantity,description,content) "
                         +
                         "VALUES(?,?,?,?,?,?,?,?,?,?,?)",
                 Statement.RETURN_GENERATED_KEYS);
@@ -65,7 +65,7 @@ public class DocumentDAO extends DAO {
 
     public void increaseStock(int bookId, int qty) throws Exception {
         PreparedStatement ps = conn.prepareStatement(
-                "UPDATE tblBook SET quantity = quantity + ?, availableQuantity = availableQuantity + ? WHERE id = ?");
+                "UPDATE tblDocument SET quantity = quantity + ?, availableQuantity = availableQuantity + ? WHERE id = ?");
         ps.setInt(1, qty);
         ps.setInt(2, qty);
         ps.setInt(3, bookId);
@@ -76,7 +76,7 @@ public class DocumentDAO extends DAO {
     public List<Book> searchByName(String name) throws Exception {
         List<Book> res = new ArrayList<>();
 
-        PreparedStatement ps = conn.prepareStatement("SELECT * FROM tblBook WHERE title LIKE ?");
+        PreparedStatement ps = conn.prepareStatement("SELECT * FROM tblDocument WHERE title LIKE ?");
         ps.setString(1, "%" + name + "%");
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -99,7 +99,7 @@ public class DocumentDAO extends DAO {
     }
 
     public Book findByIsbn(String isbn) throws Exception {
-        PreparedStatement ps = conn.prepareStatement("SELECT * FROM tblBook WHERE isbn = ?");
+        PreparedStatement ps = conn.prepareStatement("SELECT * FROM tblDocument WHERE isbn = ?");
         ps.setString(1, isbn);
         try (ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
@@ -122,7 +122,7 @@ public class DocumentDAO extends DAO {
 
     public void update(Book b) throws Exception {
         PreparedStatement ps = conn.prepareStatement(
-                "UPDATE tblBook SET isbn=?, title=?, author=?, publisher=?, price=?, publishYear=?, category=?, quantity=?, availableQuantity=?, description=?, content=? WHERE id=?");
+                "UPDATE tblDocument SET isbn=?, title=?, author=?, publisher=?, price=?, publishYear=?, category=?, quantity=?, availableQuantity=?, description=?, content=? WHERE id=?");
         ps.setString(1, b.getIsbn());
         ps.setString(2, b.getTitle());
         ps.setString(3, b.getAuthor());

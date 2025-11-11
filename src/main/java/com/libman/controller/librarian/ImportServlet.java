@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.*;
 
 @WebServlet("/import")
@@ -127,7 +126,6 @@ public class ImportServlet extends HttpServlet {
                     return;
                 }
 
-                // If title is not provided but ISBN exists, try to get from database
                 if ((title == null || title.trim().isEmpty())) {
                     Book existingBook = documentDAO.findByIsbn(isbn);
                     if (existingBook != null) {
@@ -161,7 +159,6 @@ public class ImportServlet extends HttpServlet {
 
                 try {
                     int qty = Integer.parseInt(qtyStr);
-                    // Handle both integer and decimal inputs for price
                     double priceDouble = Double.parseDouble(priceStr);
                     long bookPrice = (long) priceDouble;
                     int publishYear = 0;
