@@ -8,7 +8,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Set;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
@@ -33,12 +32,12 @@ public class LoginServlet extends HttpServlet {
         String p = req.getParameter("password");
         User user;
         try {
-            user = userDAO.findByUsername(u);
+            user = userDAO.checkLogin(u);
             if (user != null && PasswordUtil.matches(p, user.getPassword())) {
-                // Set<String> roles = userDAO.findRoles(user.getId());
+                String role = userDAO.findRole(user.getId());
                 HttpSession s = req.getSession(true);
                 s.setAttribute("user", user);
-                // s.setAttribute("roles", roles);
+                s.setAttribute("role", role);
                 resp.sendRedirect(req.getContextPath() + "/index.jsp");
             } else {
                 req.setAttribute("error", "Sai thông tin đăng nhập");

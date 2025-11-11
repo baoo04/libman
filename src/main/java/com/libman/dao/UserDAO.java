@@ -11,7 +11,7 @@ public class UserDAO extends DAO {
         super();
     }
 
-    public User findByUsername(String username) throws SQLException {
+    public User checkLogin(String username) throws SQLException {
         String sql = "SELECT id,username,password,full_name,email,phone,status FROM tblUser WHERE username=?";
 
         PreparedStatement ps = conn.prepareStatement(sql);
@@ -32,16 +32,18 @@ public class UserDAO extends DAO {
         return null;
     }
 
-    public Set<String> findRoles(Long userId) throws SQLException {
-        Set<String> rslt = new HashSet<>();
-        String sql = "SELECT r.code FROM tblUserRole ur JOIN tblRole r ON ur.role_id=r.id WHERE ur.user_id=?";
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setLong(1, userId);
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next())
-                rslt.add(rs.getString(1));
+    public String findRole(Long userId) throws SQLException {
+        String sql = "SELECT role FROM tblUser WHERE id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("role");
+                }
+            }
         }
-        return rslt;
+        return null;
     }
 
 }

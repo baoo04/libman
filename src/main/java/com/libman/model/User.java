@@ -10,15 +10,25 @@ public class User {
     private String fullName;
     private String phone;
     private String status;
+    private String role;
 
     public User() {
     }
 
-    public User(Long id, String username, String email, String password) {
+    public User(Long id, String username, String email, String password, String role) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
+        this.role = role;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public Long getId() {
@@ -77,9 +87,6 @@ public class User {
         return this.status;
     }
 
-
-    
-
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -103,6 +110,8 @@ public class User {
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
+                ", role='" + role + '\'' +
                 '}';
     }
+
 }

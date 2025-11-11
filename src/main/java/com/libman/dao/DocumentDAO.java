@@ -11,28 +11,6 @@ public class DocumentDAO extends DAO {
         super();
     }
 
-    public Book findByIsbn(String isbn) throws Exception {
-        PreparedStatement ps = conn.prepareStatement("SELECT * FROM tblBook WHERE isbn = ?");
-        ps.setString(1, isbn);
-        try (ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                Book b = new Book();
-                b.setId(rs.getInt("id"));
-                b.setIsbn(rs.getString("isbn"));
-                b.setTitle(rs.getString("title"));
-                b.setAuthor(rs.getString("author"));
-                b.setPublisher(rs.getString("publisher"));
-                b.setPrice(rs.getLong("price"));
-                b.setPublishYear(rs.getInt("publishYear"));
-                b.setQuantity(rs.getInt("quantity"));
-                b.setAvailableQuantity(rs.getInt("availableQuantity"));
-                b.setDescription(rs.getString("description"));
-                return b;
-            }
-        }
-        return null;
-    }
-
     public Book findById(int id) throws Exception {
         PreparedStatement ps = conn.prepareStatement("SELECT * FROM tblBook WHERE id=?");
         ps.setInt(1, id);
@@ -118,6 +96,28 @@ public class DocumentDAO extends DAO {
             }
         }
         return res;
+    }
+
+    public Book findByIsbn(String isbn) throws Exception {
+        PreparedStatement ps = conn.prepareStatement("SELECT * FROM tblBook WHERE isbn = ?");
+        ps.setString(1, isbn);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                Book b = new Book();
+                b.setId(rs.getInt("id"));
+                b.setIsbn(rs.getString("isbn"));
+                b.setTitle(rs.getString("title"));
+                b.setAuthor(rs.getString("author"));
+                b.setPublisher(rs.getString("publisher"));
+                b.setPrice(rs.getLong("price"));
+                b.setPublishYear(rs.getInt("publishYear"));
+                b.setQuantity(rs.getInt("quantity"));
+                b.setAvailableQuantity(rs.getInt("availableQuantity"));
+                b.setDescription(rs.getString("description"));
+                return b;
+            }
+        }
+        return null;
     }
 
     public void update(Book b) throws Exception {
