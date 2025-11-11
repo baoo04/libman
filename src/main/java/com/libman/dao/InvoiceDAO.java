@@ -10,11 +10,9 @@ public class InvoiceDAO extends DAO {
 
     private ImportOrderItemDAO importOrderItemDAO = null;
     private ImportOrderDAO importOrderDAO = null;
+
     public InvoiceDAO() throws SQLException {
         super();
-    }
-
-    public void init() throws SQLException {
         this.importOrderItemDAO = new ImportOrderItemDAO();
         this.importOrderDAO = new ImportOrderDAO();
     }
